@@ -12,7 +12,8 @@ const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password:"1980",
-    database: 'imi_his_db'
+    database: 'imi_his_db',
+    port: 3307
   });
 
 
@@ -87,46 +88,69 @@ app.get('/getemr/:id', (req, res) => {
       );
 });
 
-app.post('/addDoctor',urlencodedParser, (req, res) => {
-  console.log(req.body);
-    let sql = 'INSERT INTO doctor(name, telephone, status) VALUES (?,?,?)';
-    let values = [req.body.doctor_name,req.body.doctor_phone,req.body.status];
-    let message = "Cannot Insert";
-    connection.query(sql,values, function(err, results, fields) {
-      if(results) { message = "Inserted";}
-          res.json({error:false,data:results,msg:message});
-        }
-      );
-});
+// app.post('/addDoctor',urlencodedParser, (req, res) => {
+//   console.log(req.body);
+//     let sql = 'INSERT INTO doctor(name, telephone, status) VALUES (?,?,?)';
+//     let values = [req.body.name,req.body.telephone,req.body.status];
+//     let message = "Cannot Insert";
+//     connection.query(sql,values, function(err, results, fields) {
+//       if(results) { message = "Inserted";}
+//           res.json({error:false,data:results,msg:message});
+//         }
+//       );
+// });
 
-app.put('/editDoctor', urlencodedParser, (req, res) => {
-  console.log(req.body);
-  let sql = 'UPDATE doctor SET name =?, telephone=?, status=? WHERE doctor_id=? ';
-  let values = [req.body.doctor_name,req.body.doctor_phone,req.body.status, req.body.doctor_id];
-  let message = "Cannot Edit";
-
-  connection.query(sql,values, function(err, results, fields) {
-        if(results) { message = "Updated";}
-        res.json({error:false,data:results,msg:message});
+app.post("/addDoctor", (req, res) => {
+  const { name, telephone, status } = req.body;
+  const sql = "INSERT INTO Doctor (name, telephone, status) VALUES (?, ?, ?)";
+  connection.query(sql, [name, telephone, status], (err, result) => {
+      if (err) {
+          res.status(500).json({ error: err.message });
+      } else {
+          res.status(201).json({ 
+              message: "เพิ่มแพทย์สำเร็จ", 
+              id: result.insertId 
+          });
       }
-    );
+  });
 });
 
-app.delete('/editDoctor', urlencodedParser, (req, res) => {
-console.log(req.body);
-  let st = 0;
-  if(req.body.doctor_status==1){
-    st = 1;
+app.put("/editDoctor", (req, res) => {
+  const { doctor_ID, name, telephone, status } = req.body;
+  const sql = "UPDATE Doctor SET name = ?, telephone = ?, status = ? WHERE doctor_ID = ?";
+  connection.query(sql, [name, telephone, status, doctor_ID], (err, result) => {
+      if (err) {
+          res.status(500).json({ error: err.message });
+      } else {
+          res.json({ 
+              message: "แก้ไขข้อมูลแพทย์สำเร็จ", 
+              changedRows: result.changedRows 
+          });
+      }
+  });
+});
+
+app.delete("/editDoctor/:doctor_ID", (req, res) => {
+  console.log(req.params); // ตรวจสอบค่าที่ได้รับจาก URL
+  const { doctor_ID } = req.params;
+
+  if (!doctor_ID) {
+      return res.status(400).json({ error: "doctor_ID is required" });
   }
-  let sql = 'UPDATE doctor set status=? WHERE doctor_id=? ';
-  let values = [st,req.body.doctor_id];
-  console.log(values)
-  let message = "Cannot Delete";
-  connection.query(sql,values, function(err, results, fields) {
-          if(results) { message = "Updated";}
-          res.json({error:false,data:results,msg:message});
+
+  const sql = "UPDATE Doctor SET status = 1 WHERE doctor_ID = ?";
+  connection.query(sql, [doctor_ID], (err, result) => {
+      if (err) {
+          return res.status(500).json({ error: err.message });
       }
-    );
+      res.json({ 
+          message: "ลบแพทย์สำเร็จ", 
+          affectedRows: result.affectedRows 
+      });
+  });
 });
+
+
+
 
 
