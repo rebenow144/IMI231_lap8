@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
             {"api_name":"/getDoctor/:id","method":"get"},
             {"api_name":"/addDoctor/","method":"post"},
             {"api_name":"/editDoctor/","method":"put"},
-            {"api_name":"/editDoctor/","method":"delete"},
+            {"api_name":"/deleteDoctor/:id","method":"delete"},
         ]
     });
 });
@@ -88,17 +88,6 @@ app.get('/getemr/:id', (req, res) => {
       );
 });
 
-// app.post('/addDoctor',urlencodedParser, (req, res) => {
-//   console.log(req.body);
-//     let sql = 'INSERT INTO doctor(name, telephone, status) VALUES (?,?,?)';
-//     let values = [req.body.name,req.body.telephone,req.body.status];
-//     let message = "Cannot Insert";
-//     connection.query(sql,values, function(err, results, fields) {
-//       if(results) { message = "Inserted";}
-//           res.json({error:false,data:results,msg:message});
-//         }
-//       );
-// });
 
 app.post("/addDoctor", (req, res) => {
   const { name, telephone, status } = req.body;
@@ -130,25 +119,31 @@ app.put("/editDoctor", (req, res) => {
   });
 });
 
-app.delete("/editDoctor/:doctor_ID", (req, res) => {
-  console.log(req.params); // ตรวจสอบค่าที่ได้รับจาก URL
-  const { doctor_ID } = req.params;
-
-  if (!doctor_ID) {
-      return res.status(400).json({ error: "doctor_ID is required" });
+app.delete("/deleteDoctor/:id", (req, res) => {
+  const doctor_id = req.params.id;
+  
+  if (!doctor_id) {
+      return res.status(400).json({ error: "กรุณาระบุ ID ของแพทย์" });
   }
 
-  const sql = "UPDATE Doctor SET status = 1 WHERE doctor_ID = ?";
-  connection.query(sql, [doctor_ID], (err, result) => {
+  const sql = "DELETE FROM Doctor WHERE doctor_id = ?";
+  connection.query(sql, [doctor_id], (err, result) => {
       if (err) {
           return res.status(500).json({ error: err.message });
       }
+      
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ error: "ไม่พบข้อมูลแพทย์" });
+      }
+      
       res.json({ 
-          message: "ลบแพทย์สำเร็จ", 
+          message: "ลบข้อมูลแพทย์สำเร็จ", 
           affectedRows: result.affectedRows 
       });
   });
 });
+
+
 
 
 

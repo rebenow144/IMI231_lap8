@@ -4,87 +4,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ตัวอย่าง Bootstrap</title>
-    <!-- นำเข้า Bootstrap CSS ผ่าน CDN -->
+    <title>ระบบจัดการข้อมูลแพทย์</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        .btn-action {
+            margin: 0 2px;
+        }
+        .modal-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .table thead th {
+            background-color: #f8f9fa;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container mt-5">
-        <div class="row">
+        <!-- Header Section -->
+        <div class="row mb-4">
             <div class="col-10">
                 <h1>ข้อมูลแพทย์</h1>
             </div>
-            <div class="col-2  text-end">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#from_doctor_Modal"
-                    onclick="click_momal_add()">เพิ่ม</button>
+            <div class="col-2 text-end">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" 
+                        data-bs-target="#doctorModal" onclick="handleAddDoctor()">
+                    <i class="bi bi-plus-lg"></i> เพิ่มแพทย์
+                </button>
             </div>
         </div>
 
-
-        <table class="table table-striped table-hover" id="table_doctor_list">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">ชื่อ</th>
-                    <th scope="col">เบอร์โทร</th>
-                    <th scope="col">สถานะ</th>
-                    <th scope="col">#</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+        <!-- Table Section -->
+        <div class="table-responsive">
+            <table class="table table-striped table-hover" id="doctorTable">
+                <thead>
+                    <tr>
+                        <th scope="col">รหัส</th>
+                        <th scope="col">ชื่อ</th>
+                        <th scope="col">เบอร์โทร</th>
+                        <th scope="col">สถานะ</th>
+                        <th scope="col">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="modal fade modal-lg" id="from_doctor_Modal" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <!-- Modal Form -->
+    <div class="modal fade" id="doctorModal" tabindex="-1" aria-hidden="true" 
+         data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="FormModalLabel">เพิ่มข้อมูลแพทย์</h1>
+                    <h5 class="modal-title" id="modalTitle">เพิ่มข้อมูลแพทย์</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form>
-                        <input type="hidden" id="edit_type">
-                        <div class="form-floating mb-3" id="form_docter_id">
-                            <input type="text" class="form-control" id="txt_docter_id" readonly>
-                            <label for="txt_docter_id">รหัสประจำตัว</label>
+                    <form id="doctorForm">
+                        <input type="hidden" id="doctorId">
+                        <input type="hidden" id="actionType">
+                    
+                        <div class="mb-3">
+                            <label for="doctorName" class="form-label">ชื่อแพทย์</label>
+                            <input type="text" class="form-control" id="doctorName" name="doctorName" required>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input type="email" class="form-control" id="form_name" required>
-                            <label for="form_name">ชื่อ</label>
+                    
+                        <div class="mb-3">
+                            <label for="doctorPhone" class="form-label">เบอร์โทรศัพท์</label>
+                            <input type="tel" class="form-control" id="doctorPhone" name="doctorPhone" 
+                                   pattern="[0-9]{10}" title="กรุณากรอกเบอร์โทรศัพท์ 10 หลัก" required>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input type="email" class="form-control" id="form_phone" required>
-                            <label for="form_phone">เบอร์โทร</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <select class="form-select" id="form_status" required>
+                    
+                        <div class="mb-3">
+                            <label for="doctorStatus" class="form-label">สถานะ</label>
+                            <select class="form-select" id="doctorStatus" name="doctorStatus" required>
                                 <option value="1">ปัจจุบัน</option>
                                 <option value="0">ลาออก</option>
                             </select>
-                            <label for="form_status">สถานะ</label>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="get_doctor_api();">ปิด</button>
-                    <button type="button" class="btn btn-primary" onclick="save_doctor()">บันทึก</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-primary" onclick="handleSubmit()">บันทึก</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- นำเข้า Bootstrap Bundle ที่รวม Popper.js ไว้ด้วย -->
+    <!-- Bootstrap and other scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        // เริ่มต้นใช้งาน tooltip สำหรับทุกองค์ประกอบที่มี attribute data-bs-toggle="tooltip"
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        const tooltipList = Array.from(tooltipTriggerList).map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+// Global variables
+const API_URL = 'http://127.0.0.1:3000';
+let doctorModal;
+
+// Initialize when document is ready
+document.addEventListener('DOMContentLoaded', function() {
+    doctorModal = new bootstrap.Modal(document.getElementById('doctorModal'));
+    loadDoctors();
+});
+
+// Load all doctors
+function loadDoctors() {
+    fetch(`${API_URL}/getDoctors`)
+        .then(response => {
+            if (!response.ok) throw new Error('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+            return response.json();
+        })
+        .then(doctors => {
+            const tbody = document.querySelector('#doctorTable tbody');
+            tbody.innerHTML = '';
+            
+            doctors.forEach(doctor => {
+                const statusBadge = doctor.status == 1 ? 
+                    '<span class="badge bg-success">ปัจจุบัน</span>' : 
+                    '<span class="badge bg-secondary">ลาออก</span>';
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${doctor.doctor_id}</td>
+                    <td>${doctor.name}</td>
+                    <td>${doctor.telephone}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm btn-action" 
+                                onclick="handleEditDoctor(${doctor.doctor_id})">
+                            แก้ไข
+                        </button>
+                        <button class="btn btn-danger btn-sm btn-action" 
+                                onclick="handleDeleteDoctor(${doctor.doctor_id})">
+                            ลบ
+                        </button>
+                    </td>
+                `;
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('ไม่สามารถโหลดข้อมูลแพทย์ได้');
+        });
+}
+
+// Handle Add Doctor - เตรียมฟอร์มสำหรับเพิ่มข้อมูล
+function handleAddDoctor() {
+    document.getElementById('modalTitle').textContent = 'เพิ่มข้อมูลแพทย์';
+    document.getElementById('doctorForm').reset();
+    document.getElementById('actionType').value = 'add';
+    document.getElementById('doctorId').value = '';
+}
+
+// Handle Edit Doctor - โหลดข้อมูลแพทย์เพื่อแก้ไข
+function handleEditDoctor(doctorId) {
+    document.getElementById('modalTitle').textContent = 'แก้ไขข้อมูลแพทย์';
+    document.getElementById('actionType').value = 'edit';
+    document.getElementById('doctorId').value = doctorId;
+
+    fetch(`${API_URL}/getdoctor/${doctorId}`)
+        .then(response => {
+            if (!response.ok) throw new Error('ไม่สามารถโหลดข้อมูลแพทย์ได้');
+            return response.json();
+        })
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                const doctor = data[0];
+                document.getElementById('doctorName').value = doctor.name;
+                document.getElementById('doctorPhone').value = doctor.telephone;
+                document.getElementById('doctorStatus').value = doctor.status.toString();
+                doctorModal.show();
+            } else {
+                throw new Error('ไม่พบข้อมูลแพทย์');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message);
+        });
+}
+
+// Handle Delete Doctor - ลบข้อมูลแพทย์
+function handleDeleteDoctor(doctorId) {
+    if (confirm('คุณต้องการลบข้อมูลแพทย์ท่านนี้ใช่หรือไม่?')) {
+        fetch(`${API_URL}/deleteDoctor/${doctorId}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('ไม่สามารถลบข้อมูลได้');
+            return response.json();
+        })
+        .then(result => {
+            alert('ลบข้อมูลแพทย์สำเร็จ');
+            loadDoctors();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('เกิดข้อผิดพลาดในการลบข้อมูล');
+        });
+    }
+}
+
+// Handle Form Submit - บันทึกข้อมูล (ทั้งเพิ่มและแก้ไข)
+function handleSubmit() {
+    const form = document.getElementById('doctorForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    const doctorData = {
+        name: document.getElementById('doctorName').value,
+        telephone: document.getElementById('doctorPhone').value,
+        status: document.getElementById('doctorStatus').value
+    };
+
+    const actionType = document.getElementById('actionType').value;
+    const doctorId = document.getElementById('doctorId').value;
+
+    let url, method;
+    if (actionType === 'add') {
+        url = `${API_URL}/addDoctor`;
+        method = 'POST';
+    } else {
+        url = `${API_URL}/editDoctor`;
+        doctorData.doctor_ID = doctorId;
+        method = 'PUT';
+    }
+
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(doctorData)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('ไม่สามารถบันทึกข้อมูลได้');
+        return response.json();
+    })
+    .then(result => {
+        alert(result.message);
+        doctorModal.hide();
+        loadDoctors();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+    });
+}
+
+// Function to validate phone number
+function validatePhoneNumber(input) {
+    const phoneNumber = input.value.replace(/\D/g, '');
+    if (phoneNumber.length === 10) {
+        input.setCustomValidity('');
+    } else {
+        input.setCustomValidity('กรุณากรอกหมายเลขโทรศัพท์ 10 หลัก');
+    }
+}
+
+// Add event listener for phone input validation
+document.getElementById('doctorPhone').addEventListener('input', function() {
+    validatePhoneNumber(this);
+});
     </script>
-    <script src="index.js"></script>
 </body>
 
 </html>
