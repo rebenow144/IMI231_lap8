@@ -2,20 +2,33 @@ const http = require('http');
 const express = require('express');
 const app = express();
 const mysql = require('mysql2');
-const cors = require('cors')
+const cors = require('cors');
 const bodyParser = require('body-parser');
+const fs = require('fs');
+
 const hostname = '127.0.0.1';
 const port = 3000;
 
-// create the connection to database
+// สร้างการเชื่อมต่อไปยัง TiDB Cloud **โดยเพิ่ม SSL**
 const connection = mysql.createConnection({
     host: 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
     user: '4HKH8pYjbujesX2.root',
-    password:"TmSKywgRdHmL7IZV",
+    password: "TmSKywgRdHmL7IZV",
     database: 'imi_his_db',
-    port: 4000
-  });
+    port: 4000,
+    ssl: {
+        rejectUnauthorized: true // หรือ false ถ้าคุณไม่มี CA certificate
+    }
+});
 
+// ตรวจสอบว่าการเชื่อมต่อทำงานได้หรือไม่
+connection.connect(err => {
+    if (err) {
+        console.error('❌ MySQL Connection Error:', err);
+        return;
+    }
+    console.log('✅ Connected to MySQL (TiDB Cloud)');
+});
 
 app.use(cors())
 app.use(express.json())
