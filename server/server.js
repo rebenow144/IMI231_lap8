@@ -9,11 +9,11 @@ const port = 3000;
 
 // create the connection to database
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password:"1980",
+    host: 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
+    user: '4HKH8pYjbujesX2.root',
+    password:"TmSKywgRdHmL7IZV",
     database: 'imi_his_db',
-    port: 3307
+    port: 4000
   });
 
 
